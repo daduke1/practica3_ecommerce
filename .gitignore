@@ -1,0 +1,5 @@
+node_modules/     # Dependencias (se instalan con `npm install`)
+data/             # Base de datos local (si usaste MongoDB local)
+.env              # Variables sensibles (crea un `.env.example` sin credenciales)
+.DS_Store         # Archivos temporales de macOS
+*.log             # Logs

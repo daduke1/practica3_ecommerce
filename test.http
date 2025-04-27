@@ -1,0 +1,162 @@
+@baseUrl = http://localhost:3000/api
+@contentType = application/json
+
+### 1. Registrar usuario admin 
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Admin User",
+  "email": "admin1@example.com",
+  "password": "123456",
+  "role": "admin"
+}
+
+### 2. Registrar usuario cliente
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Client User",
+  "email": "client@example.com",
+  "password": "123456",
+  "role": "client"
+}
+
+### 3. Login como admin
+# @name adminLogin
+POST {{baseUrl}}/users/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@example.com",
+  "password": "123456"
+}
+
+### 4. Login como cliente
+# @name clientLogin
+POST {{baseUrl}}/users/login
+Content-Type: {{contentType}}
+
+{
+  "email": "client@example.com",
+  "password": "123456"
+}
+
+### 5. Obtener token del admin
+@adminToken = {{adminLogin.response.body.token}}
+
+### 6. Obtener token del cliente
+@clientToken = {{clientLogin.response.body.token}}
+
+### 7. Crear producto (solo admin)
+POST {{baseUrl}}/products
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Laptop HP Elite",
+  "description": "Laptop empresarial de 14 pulgadas",
+  "price": 1500,
+  "stock": 15,
+  "category": "Tecnología"
+}
+
+### 8. Crear segundo producto
+POST {{baseUrl}}/products
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Teclado mecánico",
+  "description": "Teclado mecánico RGB",
+  "price": 120,
+  "stock": 30,
+  "category": "Periféricos"
+}
+
+### 9. Listar todos los productos (público)
+GET {{baseUrl}}/products
+
+### 10. Obtener producto específico (público)
+# Reemplaza :id con un ID real de producto
+GET {{baseUrl}}/products/{{$timestamp}}
+
+### 11. Intentar crear producto como cliente (debe fallar con 403)
+POST {{baseUrl}}/products
+Authorization: Bearer {{clientToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Producto no autorizado",
+  "description": "Este no debería crearse",
+  "price": 100,
+  "stock": 10,
+  "category": "Pruebas"
+}
+
+### 12. Crear orden como cliente
+# @name createOrder
+POST {{baseUrl}}/orders
+Authorization: Bearer {{clientToken}}
+Content-Type: {{contentType}}
+
+{
+  "products": [
+    {
+      "productId": "1",  # Reemplaza con ID real
+      "quantity": 2
+    },
+    {
+      "productId": "2",  # Reemplaza con ID real
+      "quantity": 1
+    }
+  ]
+}
+
+### 13. Obtener ID de la orden creada
+@orderId = {{createOrder.response.body.data._id}}
+
+### 14. Ver órdenes del cliente
+GET {{baseUrl}}/orders
+Authorization: Bearer {{clientToken}}
+
+### 15. Ver detalle de orden específica
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{clientToken}}
+
+### 16. Intentar ver todos los usuarios como cliente (debe fallar con 403)
+GET {{baseUrl}}/users
+Authorization: Bearer {{clientToken}}
+
+### 17. Ver todos los usuarios como admin
+GET {{baseUrl}}/users
+Authorization: Bearer {{adminToken}}
+
+### 18. Actualizar producto como admin
+# Reemplaza :id con ID real
+PUT {{baseUrl}}/products/1
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "price": 1450,
+  "stock": 12
+}
+
+### 19. Eliminar producto como admin
+# Reemplaza :id con ID real
+DELETE {{baseUrl}}/products/2
+Authorization: Bearer {{adminToken}}
+
+### 20. Actualizar perfil de usuario
+PUT {{baseUrl}}/users/client@example.com  # Usa el email del usuario
+Authorization: Bearer {{clientToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Nombre Actualizado"
+}
+
+### 21. Ver documentación Swagger
+GET http://localhost:3000/api-docs
